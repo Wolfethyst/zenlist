@@ -1,34 +1,41 @@
 
 function Dashboard() {
-  const { isAuthenticated, userInfo } = useLogto();
+  const { isAuthenticated, getUserInfo } = useLogto();
+  const [userInfo, setUserInfo] = useState<any>(null);
   const [families, setFamilies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (isAuthenticated && userInfo?.sub) {
-      // Create user in D1 if not exists
-      fetch(`/api/users`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sub: userInfo.sub, email: userInfo.email })
+    if (isAuthenticated) {
+      getUserInfo().then((info: any) => {
+        setUserInfo(info);
+        if (info?.sub) {
+          // Create user in D1 if not exists
+          fetch(`/api/users`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sub: info.sub, email: info.email })
+          });
+          setLoading(true);
+          fetch(`/api/families?userId=${info.sub}`)
+            .then(res => res.json())
+            .then(data => {
+              setFamilies(data);
+              setLoading(false);
+            })
+            .catch(() => {
+              setError("Failed to load families.");
+              setLoading(false);
+            });
+        }
       });
-      setLoading(true);
-      fetch(`/api/families?userId=${userInfo.sub}`)
-        .then(res => res.json())
-        .then(data => {
-          setFamilies(data);
-          setLoading(false);
-        })
-        .catch(() => {
-          setError("Failed to load families.");
-          setLoading(false);
-        });
     }
-  }, [isAuthenticated, userInfo]);
+  }, [isAuthenticated, getUserInfo]);
 
   const createFamily = async () => {
+    if (!userInfo?.sub) return;
     setLoading(true);
     setError("");
     const res = await fetch(`/api/families`, {
@@ -50,6 +57,7 @@ function Dashboard() {
 
   const [joinFamilyId, setJoinFamilyId] = useState("");
   const joinFamily = async (familyId: number) => {
+    if (!userInfo?.sub) return;
     setLoading(true);
     setError("");
     const res = await fetch(`/api/families/${familyId}/join`, {
@@ -68,6 +76,7 @@ function Dashboard() {
   };
 
   const leaveFamily = async (familyId: number) => {
+    if (!userInfo?.sub) return;
     setLoading(true);
     setError("");
     const res = await fetch(`/api/families/${familyId}/leave`, {
@@ -86,6 +95,7 @@ function Dashboard() {
   };
 
   const deleteFamily = async (familyId: number) => {
+    if (!userInfo?.sub) return;
     setLoading(true);
     setError("");
     const res = await fetch(`/api/families/${familyId}`, {
