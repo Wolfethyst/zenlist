@@ -138,4 +138,3 @@ import { useLogto } from "@logto/react";
     </Box>
   );
 }
-}
