@@ -1,45 +1,141 @@
-import { Box, Heading, SimpleGrid, VStack, Text, Tag, Button } from "@chakra-ui/react";
-import { useState } from "react";
+import { Box, Heading, SimpleGrid, VStack, Text, Tag, Button, Input, HStack, Spinner } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { useLogto } from "@logto/react";
 
-type Member = {
-  name: string;
-  lists: string[];
-};
+// TODO: Implement real family management features (create/join/leave/delete families)
+  const { isAuthenticated, userInfo } = useLogto();
+  const [families, setFamilies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [newFamilyName, setNewFamilyName] = useState("");
+  const [error, setError] = useState("");
 
-const familyMembers: Member[] = [
-  { name: "Alex", lists: ["Alex's Birthday", "Alex's Christmas"] },
-  { name: "Jamie", lists: ["Jamie's Christmas"] },
-  { name: "Taylor", lists: ["Taylor's Birthday", "Taylor's Christmas", "Taylor's Graduation"] },
-  { name: "Morgan", lists: ["Morgan's Christmas"] },
-];
+  useEffect(() => {
+    if (isAuthenticated && userInfo?.sub) {
+      setLoading(true);
+      fetch(`/api/families?userId=${userInfo.sub}`)
+        .then(res => res.json())
+        .then(data => {
+          setFamilies(data);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError("Failed to load families.");
+          setLoading(false);
+        });
+    }
+  }, [isAuthenticated, userInfo]);
 
-export default function Dashboard() {
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const createFamily = async () => {
+    setLoading(true);
+    setError("");
+    const res = await fetch(`/api/families`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newFamilyName, owner_id: userInfo.sub })
+    });
+    if (res.ok) {
+      setNewFamilyName("");
+      // Refresh families
+      fetch(`/api/families?userId=${userInfo.sub}`)
+        .then(res => res.json())
+        .then(data => setFamilies(data));
+    } else {
+      setError("Failed to create family.");
+    }
+    setLoading(false);
+  };
+
+  const joinFamily = async (familyId: number) => {
+    setLoading(true);
+    setError("");
+    const res = await fetch(`/api/families/${familyId}/join`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userInfo.sub })
+    });
+    if (res.ok) {
+      fetch(`/api/families?userId=${userInfo.sub}`)
+        .then(res => res.json())
+        .then(data => setFamilies(data));
+    } else {
+      setError("Failed to join family.");
+    }
+    setLoading(false);
+  };
+
+  const leaveFamily = async (familyId: number) => {
+    setLoading(true);
+    setError("");
+    const res = await fetch(`/api/families/${familyId}/leave`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userInfo.sub })
+    });
+    if (res.ok) {
+      fetch(`/api/families?userId=${userInfo.sub}`)
+        .then(res => res.json())
+        .then(data => setFamilies(data));
+    } else {
+      setError("Failed to leave family.");
+    }
+    setLoading(false);
+  };
+
+  const deleteFamily = async (familyId: number) => {
+    setLoading(true);
+    setError("");
+    const res = await fetch(`/api/families/${familyId}`, {
+      method: "DELETE"
+    });
+    if (res.ok) {
+      fetch(`/api/families?userId=${userInfo.sub}`)
+        .then(res => res.json())
+        .then(data => setFamilies(data));
+    } else {
+      setError("Failed to delete family.");
+    }
+    setLoading(false);
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <Box maxW="4xl" mx="auto" mt={10} p={8} borderRadius="xl" bg="rgba(255,255,255,0.08)" boxShadow="lg">
+        <Heading mb={6} color="white" fontSize="2xl" textAlign="center">Family Dashboard</Heading>
+        <Box textAlign="center" color="whiteAlpha.800" fontSize="lg">
+          <p>Please sign in to manage your families.</p>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box maxW="4xl" mx="auto" mt={10} p={8} borderRadius="xl" bg="rgba(255,255,255,0.08)" boxShadow="lg">
       <Heading mb={6} color="white" fontSize="2xl" textAlign="center">Family Dashboard</Heading>
-      {!selectedMember ? (
+      {error && <Text color="red.300" mb={4}>{error}</Text>}
+      {loading && <Spinner color="teal.300" mb={4} />}
+      <Box mb={6}>
+        <HStack>
+          <Input placeholder="New family name" value={newFamilyName} onChange={e => setNewFamilyName(e.target.value)} color="white" bg="rgba(255,255,255,0.12)" />
+          <Button colorScheme="teal" onClick={createFamily} isDisabled={!newFamilyName}>Create Family</Button>
+        </HStack>
+      </Box>
+      {families.length === 0 ? (
+        <Text color="whiteAlpha.800">No families yet. Create or join a family to get started!</Text>
+      ) : (
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-          {familyMembers.map((member) => (
-            <VStack key={member.name} bg="rgba(0,0,0,0.15)" borderRadius="lg" p={6} align="center" spacing={2} boxShadow="md">
-              <Text fontWeight="bold" color="white" fontSize="lg">{member.name}</Text>
-              <Tag colorScheme="teal" fontSize="sm">{member.lists.length} lists</Tag>
-              <Button colorScheme="teal" size="sm" onClick={() => setSelectedMember(member)}>View Lists</Button>
+          {families.map((fam: any) => (
+            <VStack key={fam.id} bg="rgba(0,0,0,0.15)" borderRadius="lg" p={6} align="center" spacing={2} boxShadow="md">
+              <Text fontWeight="bold" color="white" fontSize="lg">{fam.name}</Text>
+              <Tag colorScheme="teal" fontSize="sm">Family ID: {fam.id}</Tag>
+              <HStack>
+                <Button colorScheme="teal" size="sm" onClick={() => leaveFamily(fam.id)}>Leave</Button>
+                <Button colorScheme="red" size="sm" onClick={() => deleteFamily(fam.id)}>Delete</Button>
+              </HStack>
             </VStack>
           ))}
         </SimpleGrid>
-      ) : (
-        <VStack spacing={4} align="center">
-          <Heading color="white" fontSize="xl">{selectedMember.name}'s Lists</Heading>
-          {selectedMember.lists.map((list) => (
-            <Box key={list} bg="whiteAlpha.200" color="white" borderRadius="md" p={4} w="100%" textAlign="center">
-              {list}
-            </Box>
-          ))}
-          <Button colorScheme="teal" variant="outline" onClick={() => setSelectedMember(null)}>Back to Family</Button>
-        </VStack>
       )}
     </Box>
   );
+}
 }

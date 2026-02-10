@@ -13,6 +13,14 @@ CREATE TABLE families (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE family_members (
+  family_id INTEGER REFERENCES families(id),
+  user_id INTEGER REFERENCES users(id),
+  role TEXT DEFAULT 'member',
+  joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (family_id, user_id)
+);
+
 CREATE TABLE lists (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   family_id INTEGER REFERENCES families(id),
