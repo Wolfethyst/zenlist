@@ -1,7 +1,5 @@
-import { Box, Heading, SimpleGrid, VStack, Text, Tag, Button, Input, HStack, Spinner } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
-import { useLogto } from "@logto/react";
 
+function Dashboard() {
   const { isAuthenticated, userInfo } = useLogto();
   const [families, setFamilies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -152,3 +150,5 @@ import { useLogto } from "@logto/react";
     </Box>
   );
 }
+
+export default Dashboard;
