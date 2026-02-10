@@ -1,8 +1,9 @@
+
 name = "zenlist-api"
-type = "javascript"
 account_id = "YOUR_ACCOUNT_ID"
 workers_dev = true
-main = "./api/index.js"
+# Set the correct entry point for your worker below. If you use src/index.ts, set main = "src/index.ts"
+main = "api/index.ts"
 compatibility_date = "2026-02-10"
 
 [env.production]
