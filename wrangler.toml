@@ -1,6 +1,6 @@
 
 name = "zenlist-api"
-account_id = "YOUR_ACCOUNT_ID"
+account_id = "81845f9b6a8496a989cbe0ba6a78ddc7"
 workers_dev = true
 # Set the correct entry point for your worker below. If you use src/index.ts, set main = "src/index.ts"
 main = "api/index.ts"
