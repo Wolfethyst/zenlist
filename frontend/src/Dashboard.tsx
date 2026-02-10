@@ -2,17 +2,22 @@ import { Box, Heading, SimpleGrid, VStack, Text, Tag, Button, Input, HStack, Spi
 import { useState, useEffect } from "react";
 import { useLogto } from "@logto/react";
 
-export function Dashboard() {
-  const { isAuthenticated, user } = useLogto();
+  const { isAuthenticated, userInfo } = useLogto();
   const [families, setFamilies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (isAuthenticated && user?.sub) {
+    if (isAuthenticated && userInfo?.sub) {
+      // Create user in D1 if not exists
+      fetch(`/api/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sub: userInfo.sub, email: userInfo.email })
+      });
       setLoading(true);
-      fetch(`/api/families?userId=${user?.sub}`)
+      fetch(`/api/families?userId=${userInfo.sub}`)
         .then(res => res.json())
         .then(data => {
           setFamilies(data);
@@ -23,7 +28,7 @@ export function Dashboard() {
           setLoading(false);
         });
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, userInfo]);
 
   const createFamily = async () => {
     setLoading(true);
@@ -31,12 +36,12 @@ export function Dashboard() {
     const res = await fetch(`/api/families`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newFamilyName, owner_id: user?.sub })
+      body: JSON.stringify({ name: newFamilyName, owner_id: userInfo.sub })
     });
     if (res.ok) {
       setNewFamilyName("");
       // Refresh families
-      fetch(`/api/families?userId=${user?.sub}`)
+      fetch(`/api/families?userId=${userInfo.sub}`)
         .then(res => res.json())
         .then(data => setFamilies(data));
     } else {
@@ -52,10 +57,10 @@ export function Dashboard() {
     const res = await fetch(`/api/families/${familyId}/join`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: user?.sub })
+      body: JSON.stringify({ user_id: userInfo.sub })
     });
     if (res.ok) {
-      fetch(`/api/families?userId=${user?.sub}`)
+      fetch(`/api/families?userId=${userInfo.sub}`)
         .then(res => res.json())
         .then(data => setFamilies(data));
     } else {
@@ -70,10 +75,10 @@ export function Dashboard() {
     const res = await fetch(`/api/families/${familyId}/leave`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: user?.sub })
+      body: JSON.stringify({ user_id: userInfo.sub })
     });
     if (res.ok) {
-      fetch(`/api/families?userId=${user?.sub}`)
+      fetch(`/api/families?userId=${userInfo.sub}`)
         .then(res => res.json())
         .then(data => setFamilies(data));
     } else {
@@ -89,7 +94,7 @@ export function Dashboard() {
       method: "DELETE"
     });
     if (res.ok) {
-      fetch(`/api/families?userId=${user?.sub}`)
+      fetch(`/api/families?userId=${userInfo.sub}`)
         .then(res => res.json())
         .then(data => setFamilies(data));
     } else {
@@ -136,7 +141,7 @@ export function Dashboard() {
               <Tag colorScheme="teal" fontSize="sm">Family ID: {fam.id}</Tag>
               <HStack>
                 <Button colorScheme="teal" size="sm" onClick={() => leaveFamily(fam.id)}>Leave</Button>
-                {fam.owner_id === user?.sub && (
+                {fam.owner_id === userInfo?.sub && (
                   <Button colorScheme="red" size="sm" onClick={() => deleteFamily(fam.id)}>Delete</Button>
                 )}
               </HStack>
