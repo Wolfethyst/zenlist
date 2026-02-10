@@ -15,7 +15,7 @@ jobs:
 
       - name: Publish Worker
         env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
         run: |
-          wrangler publish ./api --env production --account-id $CF_ACCOUNT_ID
+          npx wrangler deploy --env production
