@@ -46,12 +46,18 @@ export default {
           ).run(email, password_hash);
           return Response.json({ id: result.lastRowId, email });
         } catch (e) {
+          // Enhanced error logging for debugging
+          console.error("Signup DB error:", e && e.message ? e.message : e);
+          if (e.stack) console.error("Stack trace:", e.stack);
           if (e.message && e.message.includes("UNIQUE")) {
             return new Response("Email already registered", { status: 409 });
           }
           return new Response("Database error", { status: 500 });
         }
       } catch (e) {
+        // Enhanced error logging for debugging
+        console.error("Signup outer error:", e && e.message ? e.message : e);
+        if (e.stack) console.error("Stack trace:", e.stack);
         return new Response("Invalid request", { status: 400 });
       }
     }
