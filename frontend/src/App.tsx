@@ -1,6 +1,6 @@
 import { Box, Heading, Text, Button, Stack, Container, SimpleGrid, Flex, VStack, HStack } from "@chakra-ui/react";
 import DashboardPreview from "./DashboardPreview";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+// import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 // import SignIn from "./SignIn";
 import { Dashboard } from "./Dashboard";
 import { LogtoProvider, useHandleSignInCallback } from "@logto/react";
@@ -9,7 +9,6 @@ const logtoConfig = {
   endpoint: "https://z8v2lq.logto.app/", // Replace with your Logto endpoint
   appId: "42fbffgjplkn7zwpvgj9v", // Correct Logto appId
 };
-// Minimal list SVG icon
 const ListIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
     <line x1="8" y1="6" x2="21" y2="6" />
@@ -97,3 +96,4 @@ function LandingPage() {
     </Box>
   );
 }
+export default LandingPage;
