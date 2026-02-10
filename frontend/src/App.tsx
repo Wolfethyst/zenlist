@@ -2,7 +2,7 @@ import { Box, Heading, Text, Button, Stack, Container, SimpleGrid, Flex, VStack,
 import DashboardPreview from "./DashboardPreview";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 // import SignIn from "./SignIn";
-import Dashboard from "./Dashboard";
+import { Dashboard } from "./Dashboard";
 import { LogtoProvider, useHandleSignInCallback } from "@logto/react";
 
 const logtoConfig = {
