@@ -1,7 +1,12 @@
 import { Box, Heading, SimpleGrid, VStack, Text, Tag, Button } from "@chakra-ui/react";
 import { useState } from "react";
 
-const familyMembers = [
+type Member = {
+  name: string;
+  lists: string[];
+};
+
+const familyMembers: Member[] = [
   { name: "Alex", lists: ["Alex's Birthday", "Alex's Christmas"] },
   { name: "Jamie", lists: ["Jamie's Christmas"] },
   { name: "Taylor", lists: ["Taylor's Birthday", "Taylor's Christmas", "Taylor's Graduation"] },
@@ -9,7 +14,7 @@ const familyMembers = [
 ];
 
 export default function Dashboard() {
-  const [selectedMember, setSelectedMember] = useState(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
   return (
     <Box maxW="4xl" mx="auto" mt={10} p={8} borderRadius="xl" bg="rgba(255,255,255,0.08)" boxShadow="lg">

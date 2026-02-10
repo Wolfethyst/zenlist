@@ -1,4 +1,4 @@
-import { Box, Heading, Input, Button, FormControl, FormLabel, VStack } from "@chakra-ui/react";
+import { Box, Heading, Button, VStack } from "@chakra-ui/react";
 
 import { useLogto } from "@logto/react";
 

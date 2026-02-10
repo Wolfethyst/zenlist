@@ -1,4 +1,4 @@
-import { Box, Heading, Text, Avatar, VStack, HStack, Tag, SimpleGrid, Divider } from "@chakra-ui/react";
+import { Box, Heading, Text, VStack, HStack, Tag, SimpleGrid, Divider } from "@chakra-ui/react";
 
 const familyMembers = [
   { name: "Alex", role: "Parent" },
