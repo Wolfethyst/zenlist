@@ -1,24 +1,19 @@
 import { Box, Heading, SimpleGrid, VStack, Text, Tag, Button, Input, HStack, Spinner } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import { useLogto } from "@logto/react";
 
-function Dashboard() {
-  const { isAuthenticated, userInfo } = useLogto();
+function Dashboard({ user }: { user: { email: string } }) {
+  // For demo, use email as user id. In production, use a real user id from backend.
+  const userId = user.email;
   const [families, setFamilies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState("");
   const [error, setError] = useState("");
+  const [joinFamilyId, setJoinFamilyId] = useState("");
 
   useEffect(() => {
-    if (isAuthenticated && userInfo?.sub) {
-      // Create user in D1 if not exists
-      fetch(`/api/users`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sub: userInfo.sub, email: userInfo.email })
-      });
+    if (userId) {
       setLoading(true);
-      fetch(`/api/families?userId=${userInfo.sub}`)
+      fetch(`/api/families?userId=${encodeURIComponent(userId)}`)
         .then(res => res.json())
         .then(data => {
           setFamilies(data);
@@ -29,21 +24,20 @@ function Dashboard() {
           setLoading(false);
         });
     }
-  }, [isAuthenticated, userInfo]);
+  }, [userId]);
 
   const createFamily = async () => {
-    if (!userInfo?.sub) return;
+    if (!userId) return;
     setLoading(true);
     setError("");
     const res = await fetch(`/api/families`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newFamilyName, owner_id: userInfo.sub })
+      body: JSON.stringify({ name: newFamilyName, owner_id: userId })
     });
     if (res.ok) {
       setNewFamilyName("");
-      // Refresh families
-      fetch(`/api/families?userId=${userInfo.sub}`)
+      fetch(`/api/families?userId=${encodeURIComponent(userId)}`)
         .then(res => res.json())
         .then(data => setFamilies(data));
     } else {
@@ -52,18 +46,17 @@ function Dashboard() {
     setLoading(false);
   };
 
-  const [joinFamilyId, setJoinFamilyId] = useState("");
   const joinFamily = async (familyId: number) => {
-    if (!userInfo?.sub) return;
+    if (!userId) return;
     setLoading(true);
     setError("");
     const res = await fetch(`/api/families/${familyId}/join`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userInfo.sub })
+      body: JSON.stringify({ user_id: userId })
     });
     if (res.ok) {
-      fetch(`/api/families?userId=${userInfo.sub}`)
+      fetch(`/api/families?userId=${encodeURIComponent(userId)}`)
         .then(res => res.json())
         .then(data => setFamilies(data));
     } else {
@@ -73,16 +66,16 @@ function Dashboard() {
   };
 
   const leaveFamily = async (familyId: number) => {
-    if (!userInfo?.sub) return;
+    if (!userId) return;
     setLoading(true);
     setError("");
     const res = await fetch(`/api/families/${familyId}/leave`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userInfo.sub })
+      body: JSON.stringify({ user_id: userId })
     });
     if (res.ok) {
-      fetch(`/api/families?userId=${userInfo.sub}`)
+      fetch(`/api/families?userId=${encodeURIComponent(userId)}`)
         .then(res => res.json())
         .then(data => setFamilies(data));
     } else {
@@ -92,14 +85,14 @@ function Dashboard() {
   };
 
   const deleteFamily = async (familyId: number) => {
-    if (!userInfo?.sub) return;
+    if (!userId) return;
     setLoading(true);
     setError("");
     const res = await fetch(`/api/families/${familyId}`, {
       method: "DELETE"
     });
     if (res.ok) {
-      fetch(`/api/families?userId=${userInfo.sub}`)
+      fetch(`/api/families?userId=${encodeURIComponent(userId)}`)
         .then(res => res.json())
         .then(data => setFamilies(data));
     } else {
@@ -107,17 +100,6 @@ function Dashboard() {
     }
     setLoading(false);
   };
-
-  if (!isAuthenticated) {
-    return (
-      <Box maxW="4xl" mx="auto" mt={10} p={8} borderRadius="xl" bg="rgba(255,255,255,0.08)" boxShadow="lg">
-        <Heading mb={6} color="white" fontSize="2xl" textAlign="center">Family Dashboard</Heading>
-        <Box textAlign="center" color="whiteAlpha.800" fontSize="lg">
-          <p>Please sign in to manage your families.</p>
-        </Box>
-      </Box>
-    );
-  }
 
   return (
     <Box maxW="4xl" mx="auto" mt={10} p={8} borderRadius="xl" bg="rgba(255,255,255,0.08)" boxShadow="lg">
@@ -146,7 +128,8 @@ function Dashboard() {
               <Tag colorScheme="teal" fontSize="sm">Family ID: {fam.id}</Tag>
               <HStack>
                 <Button colorScheme="teal" size="sm" onClick={() => leaveFamily(fam.id)}>Leave</Button>
-                {fam.owner_id === userInfo?.sub && (
+                {/* Only allow delete if user is owner */}
+                {fam.owner_id === userId && (
                   <Button colorScheme="red" size="sm" onClick={() => deleteFamily(fam.id)}>Delete</Button>
                 )}
               </HStack>
