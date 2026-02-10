@@ -1,0 +1,21 @@
+name: Deploy Worker via Wrangler
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Publish Worker
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          wrangler publish ./api --env production --account-id $CF_ACCOUNT_ID
