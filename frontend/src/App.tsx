@@ -7,7 +7,7 @@ import { LogtoProvider, useHandleSignInCallback } from "@logto/react";
 
 const logtoConfig = {
   endpoint: "https://z8v2lq.logto.app/", // Replace with your Logto endpoint
-  appId: "42bffgiplkzn7zwpvgi9v", // Replace with your Logto appId
+  appId: "42fbffgjplkn7zwpvgj9v", // Correct Logto appId
 };
 // Minimal list SVG icon
 const ListIcon = () => (
