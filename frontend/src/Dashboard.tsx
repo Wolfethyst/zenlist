@@ -2,7 +2,7 @@ import { Box, Heading, SimpleGrid, VStack, Text, Tag, Button, Input, HStack, Spi
 import { useState, useEffect } from "react";
 import { useLogto } from "@logto/react";
 
-// TODO: Implement real family management features (create/join/leave/delete families)
+export function Dashboard() {
   const { isAuthenticated, userInfo } = useLogto();
   const [families, setFamilies] = useState([]);
   const [loading, setLoading] = useState(false);
