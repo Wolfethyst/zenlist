@@ -21,21 +21,7 @@ const ListIcon = () => (
   </svg>
 );
 
-export default function App() {
-  return (
-    <LogtoProvider config={logtoConfig}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          {/* Removed dedicated sign-in page */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/callback" element={<Callback />} />
-        </Routes>
-      </Router>
-    </LogtoProvider>
-  );
-}
-
+function Callback() {
   const { isLoading } = useHandleSignInCallback(() => {
     window.location.replace("/dashboard");
   });
