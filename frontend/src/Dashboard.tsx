@@ -152,3 +152,6 @@ function Dashboard() {
 }
 
 export default Dashboard;
+import { Box, Heading, SimpleGrid, VStack, Text, Tag, Button, Input, HStack, Spinner } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { useLogto } from "@logto/react";
