@@ -3,58 +3,58 @@
 
 export default {
   async fetch(request, env, ctx) {
-        // --- AUTH SIGNUP ENDPOINT ---
-        if (url.pathname === "/api/auth/signup" && method === "POST") {
-          try {
-            const { email, password } = await request.json();
-            if (!email || !password) {
-              return new Response("Missing email or password", { status: 400 });
-            }
-            // Hash password using PBKDF2
-            const encoder = new TextEncoder();
-            const salt = crypto.getRandomValues(new Uint8Array(16));
-            const keyMaterial = await crypto.subtle.importKey(
-              "raw",
-              encoder.encode(password),
-              { name: "PBKDF2" },
-              false,
-              ["deriveBits", "deriveKey"]
-            );
-            const derivedKey = await crypto.subtle.deriveKey(
-              {
-                name: "PBKDF2",
-                salt,
-                iterations: 100000,
-                hash: "SHA-256"
-              },
-              keyMaterial,
-              { name: "AES-GCM", length: 256 },
-              true,
-              ["encrypt", "decrypt"]
-            );
-            const rawKey = new Uint8Array(await crypto.subtle.exportKey("raw", derivedKey));
-            // Store as base64(salt):base64(hash)
-            const saltB64 = btoa(String.fromCharCode(...salt));
-            const hashB64 = btoa(String.fromCharCode(...rawKey));
-            const password_hash = `${saltB64}:${hashB64}`;
-            // Insert user
-            try {
-              const result = await env.DB.prepare(
-                `INSERT INTO users (email, password_hash) VALUES (?, ?)`
-              ).run(email, password_hash);
-              return Response.json({ id: result.lastRowId, email });
-            } catch (e) {
-              if (e.message && e.message.includes("UNIQUE")) {
-                return new Response("Email already registered", { status: 409 });
-              }
-              return new Response("Database error", { status: 500 });
-            }
-          } catch (e) {
-            return new Response("Invalid request", { status: 400 });
-          }
-        }
     const url = new URL(request.url);
     const { method } = request;
+    // --- AUTH SIGNUP ENDPOINT ---
+    if (url.pathname === "/api/auth/signup" && method === "POST") {
+      try {
+        const { email, password } = await request.json();
+        if (!email || !password) {
+          return new Response("Missing email or password", { status: 400 });
+        }
+        // Hash password using PBKDF2
+        const encoder = new TextEncoder();
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const keyMaterial = await crypto.subtle.importKey(
+          "raw",
+          encoder.encode(password),
+          { name: "PBKDF2" },
+          false,
+          ["deriveBits", "deriveKey"]
+        );
+        const derivedKey = await crypto.subtle.deriveKey(
+          {
+            name: "PBKDF2",
+            salt,
+            iterations: 100000,
+            hash: "SHA-256"
+          },
+          keyMaterial,
+          { name: "AES-GCM", length: 256 },
+          true,
+          ["encrypt", "decrypt"]
+        );
+        const rawKey = new Uint8Array(await crypto.subtle.exportKey("raw", derivedKey));
+        // Store as base64(salt):base64(hash)
+        const saltB64 = btoa(String.fromCharCode(...salt));
+        const hashB64 = btoa(String.fromCharCode(...rawKey));
+        const password_hash = `${saltB64}:${hashB64}`;
+        // Insert user
+        try {
+          const result = await env.DB.prepare(
+            `INSERT INTO users (email, password_hash) VALUES (?, ?)`
+          ).run(email, password_hash);
+          return Response.json({ id: result.lastRowId, email });
+        } catch (e) {
+          if (e.message && e.message.includes("UNIQUE")) {
+            return new Response("Email already registered", { status: 409 });
+          }
+          return new Response("Database error", { status: 500 });
+        }
+      } catch (e) {
+        return new Response("Invalid request", { status: 400 });
+      }
+    }
     // Health check
     if (url.pathname === "/api/health") {
       return new Response("OK", { status: 200 });
