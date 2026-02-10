@@ -1,21 +1,20 @@
 
+
 name = "zenlist-api"
-# D1 binding for both environments
+account_id = "81845f9b6a8496a989cbe0ba6a78ddc7"
+workers_dev = true
+main = "api/index.ts"
+compatibility_date = "2026-02-10"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "zenlist-db"
 database_id = "8a187875-86b2-4bca-8113-c0397faec078"
-account_id = "81845f9b6a8496a989cbe0ba6a78ddc7"
-workers_dev = true
-# Set the correct entry point for your worker below. If you use src/index.ts, set main = "src/index.ts"
-main = "api/index.ts"
-compatibility_date = "2026-02-10"
+
 
 [env.production]
 routes = ["https://zenlist.site/api/*"]
-# D1 binding for production (optional, but explicit)
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "zenlist-db"
 database_id = "8a187875-86b2-4bca-8113-c0397faec078"
-# Add production-specific settings here
